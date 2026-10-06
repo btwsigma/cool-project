@@ -718,19 +718,19 @@ function homePage() {
       <span class="map-label">Твой маршрут к ЕГЭ</span><span class="route-line"></span><span class="pin pin-one"></span><span class="pin pin-two"></span>
     </div></div></section>
     <section class="section tasks-section"><div class="container">
-      <div class="section-head"><div><h2>Все задания ЕГЭ</h2><p class="section-description">В экзаменационной работе 2026 года — 29 заданий. Выбери нужный номер.</p></div></div>
+      <div class="section-head"><div><h2>Все задания ЕГЭ</h2><p class="section-description">В демоверсии ЕГЭ 2027 года — 29 заданий. Выбери нужный номер.</p></div></div>
       <div class="number-grid">${tasks.map(numberLink).join("")}</div>
     </div></section>
-    <section class="section"><div class="container"><h2>Почему с ГеоШагом удобно</h2><div class="benefits">
+    <section class="section"><div class="container"><h2>Начни с маршрута</h2><div class="benefits">
+      <a class="benefit benefit-link" href="#/demo"><span class="benefit-icon">📄</span><h3>Демоверсия 2027</h3><p>Посмотри структуру КИМ, инструкцию и открой официальный файл.</p></a>
+      <a class="benefit benefit-link" href="#/preparation"><span class="benefit-icon">🗺️</span><h3>План подготовки</h3><p>Собери реалистичный график, повторение и практику в одну систему.</p></a>
       <article class="benefit"><span class="benefit-icon">🧭</span><h3>По номерам КИМ</h3><p>Открывай именно то задание, которое хочешь повторить.</p></article>
-      <article class="benefit"><span class="benefit-icon">💡</span><h3>Без лишнего</h3><p>Теория, алгоритм и лайфхаки собраны в одной понятной структуре.</p></article>
-      <article class="benefit"><span class="benefit-icon">✍️</span><h3>С практикой</h3><p>Закрепляй знания на прототипах и тренировочных заданиях.</p></article>
     </div></div></section>`;
 }
 
 function tasksPage() {
   return `
-    <section class="page-heading"><div class="container"><span class="eyebrow">ЕГЭ по географии · 2026</span><h1>Все 29 заданий</h1><p>Каждый номер ведёт на отдельную страницу с единым шаблоном подготовки.</p></div></section>
+    <section class="page-heading"><div class="container"><span class="eyebrow">ЕГЭ по географии · 2027</span><h1>Все 29 заданий</h1><p>Каждый номер ведёт на отдельную страницу с единым шаблоном подготовки.</p></div></section>
     <section class="all-tasks"><div class="container"><div class="number-grid">${tasks.map(numberLink).join("")}</div></div></section>`;
 }
 
@@ -768,6 +768,40 @@ function taskPage(task) {
     </div><aside class="practice-card"><p class="practice-label">САМОПОДГОТОВКА</p><h2>Работа над заданием</h2><p>Сначала реши задания из блока «Тренировка» самостоятельно, а затем открывай ответы и разбирай ход решения.</p></aside></div></section>`;
 }
 
+function demoPage() {
+  return `
+    <section class="page-heading resource-heading"><div class="container">
+      <span class="eyebrow">ДОКУМЕНТ ФИПИ · ПРОЕКТ</span><h1>Демоверсия ЕГЭ по географии — 2027</h1>
+      <p>Раздел создан по загруженной демоверсии: здесь есть ориентир по формату работы, инструкции и быстрый доступ к PDF.</p>
+      <div class="action-row"><a class="button" href="assets/ege-geography-demo-2027.pdf" target="_blank" rel="noopener">Открыть PDF</a><a class="button button-light" href="assets/ege-geography-demo-2027.pdf" download>Скачать PDF</a></div>
+    </div></section>
+    <section class="section section-compact"><div class="container">
+      <div class="stat-grid"><article><strong>29</strong><span>заданий в работе</span></article><article><strong>180</strong><span>минут на выполнение</span></article><article><strong>1–21</strong><span>краткий ответ</span></article><article><strong>22–29</strong><span>развёрнутый ответ</span></article></div>
+    </div></section>
+    <section class="section section-compact"><div class="container content-grid resource-grid"><div>
+      ${lessonBlock("Структура демоверсии", `<p>Работа состоит из 29 заданий. В №1–21 ответом служат число, последовательность цифр или слово (словосочетание). Задания №22–29 требуют полного развёрнутого ответа или записи решения. В самой демоверсии на отдельных позициях даны варианты «или»: в реальном КИМ на каждой позиции будет только одно задание.</p>`)}
+      ${lessonBlock("Что встречается в заданиях", `<div class="topic-grid"><article><b>1–5</b><span>координаты, климатические закономерности, карты, работа с текстом</span></article><article><b>6–13</b><span>население, хозяйство, таблицы, карты, геологическая история</span></article><article><b>14–18</b><span>время, расчёты, миграции, страны и регионы по описанию</span></article><article><b>19–21</b><span>статистические приложения, тематическая карта и работа с текстом</span></article><article><b>22–23</b><span>объяснение термина и причинно-следственные связи</span></article><article><b>24–29</b><span>данные, обоснование, ЭГП, топокарта, прогноз, расчёт и последствия</span></article></div>`)}
+      ${lessonBlock("Инструкция: главное", `<p>На работу отводится 3 часа. Краткие ответы переносят в бланк №1 без лишних символов; если получена величина с единицей измерения, записывают только число. Развёрнутые ответы записывают в бланке №2 с номера задания. Черновик не проверяется. Перед сдачей нужно убедиться, что каждый ответ стоит напротив верного номера.</p>`)}
+      ${lessonBlock("Справочные материалы и разрешённые средства", `<p>Для практических заданий вместе с КИМ выдаются административная карта России, политическая карта мира и статистические приложения. Разрешён непрограммируемый калькулятор. Заранее потренируйся находить объекты на картах: на экзамене время уходит не только на расчёты, но и на уверенное чтение легенды и шкалы.</p>`)}
+      ${lessonBlock("Как пройти демоверсию с пользой", numberedList(["Скачай файл, подготовь таймер на 180 минут, чистые листы и непрограммируемый калькулятор.", "Решай за один подход и используй только те материалы, которые разрешены в инструкции.", "Отметь задания, в которых не уверен, но не задерживайся: вернись к ним после первого круга.", "Сверь ответы и критерии в конце PDF. В журнал ошибок запиши не только номер, но и причину: незнание темы, невнимательность, карта, расчёт или оформление.", "Через 7–10 дней повтори слабые темы и реши вариант снова либо возьми другой полный вариант."]))}
+    </div><aside class="practice-card"><p class="practice-label">ФАЙЛ ДЛЯ ТРЕНИРОВКИ</p><h2>Работай как на экзамене</h2><p>Демоверсия показывает форму и уровень заданий, но не исчерпывает все возможные формулировки.</p><a class="button" href="assets/ege-geography-demo-2027.pdf" target="_blank" rel="noopener">Открыть документ</a></aside></div></section>`;
+}
+
+function preparationPage() {
+  return `
+    <section class="page-heading resource-heading"><div class="container"><span class="eyebrow">СТРАТЕГИЯ НА УЧЕБНЫЙ ГОД</span><h1>Подготовка к ЕГЭ по географии</h1><p>Не пытайся выучить географию одним списком. Собери подготовку из трёх постоянных линий: темы, карты и практика — и регулярно сверяй маршрут с ошибками.</p><div class="action-row"><a class="button" href="#/demo">Начать с демоверсии</a><a class="button button-light" href="#/tasks">Перейти к заданиям</a></div></div></section>
+    <section class="section section-compact"><div class="container content-grid resource-grid"><div>
+      ${lessonBlock("С чего начать", `<p>Выполни демоверсию на время до начала системных занятий. Не оценивай себя по одному баллу: это снимок стартовой точки. Раздели темы на три группы: «решаю уверенно», «нужна тренировка» и «надо изучить с основы». Затем поставь измеримую цель: например, к марту стабильно выполнять все задания с кратким ответом и иметь шаблоны для развёрнутых.</p>`)}
+      ${lessonBlock("Какие темы изучать", `<div class="topic-grid"><article><b>Общая география</b><span>планета, координаты, литосфера, климат, воды, природные зоны, геохронология</span></article><article><b>Россия</b><span>природа, население, хозяйство, районы, транспорт, ресурсы и экологические связи</span></article><article><b>Мир</b><span>страны и регионы, население, отрасли, мировое хозяйство, показатели развития</span></article><article><b>Инструменты</b><span>масштаб, профили, топокарты, графики, таблицы, расчёты, статистика и аргументация</span></article></div><p class="block-note">Сверяй личный список тем с кодификатором и документами ФИПИ: они задают границы экзамена, а не случайные подборки из интернета.</p>`)}
+      ${lessonBlock("План подготовки", `<div class="plan-grid"><article><b>Старт · 1–2 недели</b><span>демоверсия, диагностика, папка ошибок, календарь занятий.</span></article><article><b>Осень</b><span>фундамент: физическая география, карты, базовые расчёты и номенклатура.</span></article><article><b>Зима</b><span>население, хозяйство России и мира; закрепление заданий по номерам.</span></article><article><b>Весна</b><span>полные варианты на время, вторая часть, точечное повторение слабых мест.</span></article></div><p class="block-note">Рабочий недельный ритм: два занятия по темам, одно — на карты и номенклатуру, одно — на смешанную практику. Оставь короткий слот на разбор ошибок после каждого занятия.</p>`)}
+      ${lessonBlock("Карты и номенклатура", `<p>Учи объекты не алфавитным перечнем, а связками: объект → где расположен → с чем соседствует → чем важен. На контурной карте отмечай по 10–15 объектов за подход, а на следующий день находи их без подписи. Чередуй политическую карту мира, административную карту России, физическую и тематические карты. Важно не просто узнать название, а быстро извлечь из положения вывод: климат, ресурс, транспортный путь или соседство.</p>`)}
+      ${lessonBlock("Практика и работа над ошибками", `<p>После каждой темы реши небольшой набор заданий именно этого типа, затем смешай его с уже пройденными. В журнале ошибок используй пять меток: «термин», «карта», «данные», «вычисление», «формат ответа». Для каждой записи добавляй правильный ход в одну-две строки и дату повторения. Ошибка считается закрытой только после двух самостоятельных верных решений в разные дни.</p>`)}
+      ${lessonBlock("Подготовка ко второй части", `<p>Начинай её раньше полных пробников. Разбирай критерии: в вопросе на объяснение назови механизм, в задании с данными выпиши числа и вычисление, в прогнозе построй цепочку «условие → изменение → следствие». Пиши ответ пунктами, если вопрос требует несколько доводов. После проверки сравнивай работу не только с ответом, но и с тем, за что дают баллы: верный вывод без обоснования часто недостаточен.</p>`)}
+      ${lessonBlock("За неделю и в день экзамена", listItems(["Не открывай новые большие темы: повтори формулы, карты, номенклатуру и журнал ошибок.", "Сделай один или два полноценных варианта, но не превращай последнюю неделю в марафон из пробников.", "На экзамен возьми разрешённый непрограммируемый калькулятор и распредели 180 минут: оставь запас на задания 22–29 и проверку бланков.", "Сначала собери надёжные баллы, затем возвращайся к сложным номерам. В конце проверь форму кратких ответов и номера развёрнутых."]))}
+      <p class="source-note">Материал написан специально для ГеоШага с опорой на общие идеи из <a href="https://tetrika-school.ru/blog/podgotovka-k-ege-po-geografii/" target="_blank" rel="noopener">статьи Тетрики</a> и <a href="https://umschool.one/blog/plan-podgotovki-k-ege-po-geografii-s-nulya-za-god" target="_blank" rel="noopener">материала Умскул</a>; формулировки и структура — оригинальные.</p>
+    </div><aside class="practice-card"><p class="practice-label">ПРАВИЛО НЕДЕЛИ</p><h2>Один цикл — четыре шага</h2><p>Тема → карта → задания → журнал ошибок. Если выпадает один шаг, знания быстро становятся «узнаваемыми», но не рабочими.</p><a class="button" href="#/tasks">Выбрать задание</a></aside></div></section>`;
+}
+
 function notFoundPage() {
   return `<section class="page-heading"><div class="container"><span class="eyebrow">Страница не найдена</span><h1>Похоже, здесь пока нет маршрута.</h1><a class="button" href="#/">На главную</a></div></section>`;
 }
@@ -776,10 +810,11 @@ function render() {
   const route = location.hash.slice(1) || "/";
   const taskMatch = route.match(/^\/tasks\/(\d+)$/);
   const task = taskMatch && tasks.find(({ number }) => number === Number(taskMatch[1]));
-  app.innerHTML = route === "/" ? homePage() : route === "/tasks" ? tasksPage() : task ? taskPage(task) : notFoundPage();
+  app.innerHTML = route === "/" ? homePage() : route === "/tasks" ? tasksPage() : route === "/demo" ? demoPage() : route === "/preparation" ? preparationPage() : task ? taskPage(task) : notFoundPage();
 
   document.querySelectorAll("[data-nav]").forEach((link) => {
-    link.classList.toggle("active", link.dataset.nav === (route === "/" ? "home" : "tasks"));
+    const activeNav = route === "/" ? "home" : route === "/tasks" || task ? "tasks" : route === "/demo" ? "demo" : route === "/preparation" ? "preparation" : "";
+    link.classList.toggle("active", link.dataset.nav === activeNav);
   });
   document.querySelectorAll("[data-reveal]").forEach((button) => {
     button.addEventListener("click", () => {
