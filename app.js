@@ -671,6 +671,103 @@ const tasks = [
 
 const app = document.querySelector("#app");
 
+const supabaseClient = window.supabase.createClient(
+  "https://asrgtvzpothaghypbuoy.supabase.co",
+  "sb_publishable_9Sh5f65trWG0fPz2dji2Sg_PTYAds3X",
+);
+
+function getAnonymousUserId() {
+  const key = "geoshag-anonymous-user-id";
+  let userId = localStorage.getItem(key);
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem(key, userId);
+  }
+  return userId;
+}
+
+function escapeHtml(value) {
+  const element = document.createElement("div");
+  element.textContent = value;
+  return element.innerHTML;
+}
+
+function renderCommunity(taskId, container) {
+  container.innerHTML = `<article class="lesson-block community-block" data-community data-task-id="${taskId}">
+    <div class="community-heading"><div><h2>Оцените материал</h2><p>Был ли разбор задания полезен?</p></div><p class="community-status" aria-live="polite"></p></div>
+    <div class="vote-row"><button class="vote-button" type="button" data-vote="like">👍 <span>Нравится</span> <b data-like-count>0</b></button><button class="vote-button" type="button" data-vote="dislike">👎 <span>Не нравится</span> <b data-dislike-count>0</b></button></div>
+    <div class="comments-area"><h3>Комментарии</h3><form class="comment-form" novalidate><label>Имя<input name="author" type="text" maxlength="60" autocomplete="name" required></label><label>Текст комментария<textarea name="text" rows="4" maxlength="600" required></textarea></label><button class="button" type="submit">Отправить</button></form><div class="comment-list" aria-live="polite"><p class="community-empty">Загрузка комментариев…</p></div></div>
+  </article>`;
+
+  const block = container.querySelector("[data-community]");
+  const status = block.querySelector(".community-status");
+  const likeCount = block.querySelector("[data-like-count]");
+  const dislikeCount = block.querySelector("[data-dislike-count]");
+  const voteButtons = [...block.querySelectorAll("[data-vote]")];
+  const commentForm = block.querySelector(".comment-form");
+  const commentList = block.querySelector(".comment-list");
+  const userId = getAnonymousUserId();
+
+  const showError = () => { status.textContent = "Комментарии временно недоступны."; };
+  const renderComments = (comments) => {
+    commentList.innerHTML = comments.length
+      ? comments.map((comment) => `<article class="comment-item"><strong>${escapeHtml(comment.author)}</strong><p>${escapeHtml(comment.text)}</p></article>`).join("")
+      : '<p class="community-empty">Пока нет комментариев.</p>';
+  };
+  const loadCommunity = async () => {
+    try {
+      const [votesResult, commentsResult, ownVoteResult] = await Promise.all([
+        supabaseClient.from("votes").select("vote").eq("task_id", taskId),
+        supabaseClient.from("comments").select("id, author, text, created_at").eq("task_id", taskId).order("created_at", { ascending: false }),
+        supabaseClient.from("votes").select("id").eq("task_id", taskId).eq("user_id", userId).maybeSingle(),
+      ]);
+      if (votesResult.error || commentsResult.error || ownVoteResult.error) throw new Error();
+      const votes = votesResult.data || [];
+      likeCount.textContent = String(votes.filter(({ vote }) => vote === "like").length);
+      dislikeCount.textContent = String(votes.filter(({ vote }) => vote === "dislike").length);
+      renderComments(commentsResult.data || []);
+      if (ownVoteResult.data) voteButtons.forEach((button) => { button.disabled = true; });
+    } catch {
+      commentList.innerHTML = '<p class="community-empty">Комментарии временно недоступны.</p>';
+    }
+  };
+
+  voteButtons.forEach((button) => button.addEventListener("click", async () => {
+    voteButtons.forEach((item) => { item.disabled = true; });
+    const { error } = await supabaseClient.from("votes").insert({ task_id: taskId, user_id: userId, vote: button.dataset.vote });
+    if (error) {
+      voteButtons.forEach((item) => { item.disabled = false; });
+      status.textContent = "Не удалось сохранить голос. Попробуйте позже.";
+      return;
+    }
+    status.textContent = "Спасибо, голос учтён.";
+    loadCommunity();
+  }));
+
+  commentForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const author = commentForm.elements.author.value.trim();
+    const text = commentForm.elements.text.value.trim();
+    if (!author || !text) {
+      status.textContent = "Заполните имя и текст комментария.";
+      return;
+    }
+    const button = commentForm.querySelector("button");
+    button.disabled = true;
+    const { error } = await supabaseClient.from("comments").insert({ task_id: taskId, author, text });
+    button.disabled = false;
+    if (error) {
+      showError();
+      return;
+    }
+    commentForm.reset();
+    status.textContent = "Комментарий опубликован.";
+    loadCommunity();
+  });
+
+  loadCommunity();
+}
+
 const numberLink = (task) => `
   <a class="number-card" href="#/tasks/${task.number}" aria-label="Открыть задание №${task.number}">
     <span>${task.number}</span><small>Задание</small>
@@ -764,6 +861,7 @@ function taskPage(task) {
       ${lessonBlock("Прототипы и разбор", prototypeBlocks(task.prototypes))}
       ${lessonBlock("Тренировка", practiceBlocks(task))}
       ${lessonBlock("Что запомнить", listItems(task.remember))}
+      <div data-community-mount></div>
       ${taskNavigation(task)}
     </div><aside class="practice-card"><p class="practice-label">САМОПОДГОТОВКА</p><h2>Работа над заданием</h2><p>Сначала реши задания из блока «Тренировка» самостоятельно, а затем открывай ответы и разбирай ход решения.</p></aside></div></section>`;
 }
@@ -811,6 +909,8 @@ function render() {
   const taskMatch = route.match(/^\/tasks\/(\d+)$/);
   const task = taskMatch && tasks.find(({ number }) => number === Number(taskMatch[1]));
   app.innerHTML = route === "/" ? homePage() : route === "/tasks" ? tasksPage() : route === "/demo" ? demoPage() : route === "/preparation" ? preparationPage() : task ? taskPage(task) : notFoundPage();
+
+  if (task) renderCommunity(`task-${task.number}`, app.querySelector("[data-community-mount]"));
 
   document.querySelectorAll("[data-nav]").forEach((link) => {
     const activeNav = route === "/" ? "home" : route === "/tasks" || task ? "tasks" : route === "/demo" ? "demo" : route === "/preparation" ? "preparation" : "";

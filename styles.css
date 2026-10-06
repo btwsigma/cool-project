@@ -195,6 +195,32 @@ h3 { margin-bottom: 9px; font-size: 18px; letter-spacing: -0.5px; }
 .source-note { margin: 22px 4px 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
 .source-note a { color: var(--accent-dark); text-decoration: underline; text-underline-offset: 2px; }
 
+.community-block { scroll-margin-top: 94px; }
+.community-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; }
+.community-heading h2 { margin-bottom: 7px; }
+.community-status { max-width: 280px; color: var(--muted) !important; font-size: 13px; text-align: right; }
+.community-status[data-state="success"] { color: var(--accent-dark) !important; }
+.community-status[data-state="error"] { color: #b84d39 !important; }
+.vote-row { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 28px; }
+.vote-button { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 14px; cursor: pointer; border: 1px solid var(--line); border-radius: 11px; color: var(--ink); background: #f4faf8; font: inherit; font-size: 14px; font-weight: 700; transition: transform .2s, border-color .2s, background .2s; }
+.vote-button:hover:not(:disabled) { border-color: #75c7b9; background: var(--mint); transform: translateY(-1px); }
+.vote-button:disabled { cursor: not-allowed; opacity: .65; }
+.vote-button b { display: grid; min-width: 24px; min-height: 24px; place-items: center; border-radius: 7px; color: var(--accent-dark); background: #fff; font-size: 12px; }
+.comments-area { padding-top: 23px; border-top: 1px solid var(--line); }
+.comments-area h3 { margin-bottom: 15px; }
+.comment-form { display: grid; grid-template-columns: minmax(150px, .45fr) minmax(0, 1fr) auto; align-items: end; gap: 12px; padding: 17px; border-radius: 13px; background: #f4faf8; }
+.comment-form label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 800; }
+.comment-form input, .comment-form textarea { width: 100%; border: 1px solid var(--line); border-radius: 9px; outline: 0; color: var(--ink); background: #fff; font: inherit; font-size: 14px; }
+.comment-form input { height: 42px; padding: 0 11px; }
+.comment-form textarea { min-height: 78px; padding: 10px 11px; resize: vertical; }
+.comment-form input:focus, .comment-form textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgb(11 130 123 / 12%); }
+.comment-form .button { min-height: 42px; padding: 0 16px; cursor: pointer; }
+.comment-list { display: grid; gap: 11px; margin-top: 18px; }
+.comment-item { padding: 14px 16px; border-radius: 11px; background: #f4faf8; }
+.comment-item strong { display: block; margin-bottom: 5px; color: var(--accent-dark); font-size: 14px; }
+.comment-item p, .community-empty { margin: 0 !important; font-size: 14px; line-height: 1.55 !important; }
+.community-empty { color: var(--muted) !important; }
+
 @media (max-width: 800px) {
   .hero-grid, .content-grid { grid-template-columns: 1fr; gap: 32px; }
   .map-card { min-height: 270px; }
@@ -202,6 +228,8 @@ h3 { margin-bottom: 9px; font-size: 18px; letter-spacing: -0.5px; }
   .number-grid { grid-template-columns: repeat(6, 1fr); }
   .practice-card { position: static; }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .comment-form { grid-template-columns: 1fr; }
+  .comment-form .button { justify-self: start; }
 }
 
 @media (max-width: 530px) {
@@ -224,6 +252,9 @@ h3 { margin-bottom: 9px; font-size: 18px; letter-spacing: -0.5px; }
   .brand { font-size: 16px; }
   .topic-grid, .plan-grid { grid-template-columns: 1fr; }
   .stat-grid { grid-template-columns: 1fr 1fr; }
+  .community-heading { display: block; }
+  .community-status { margin-top: 8px !important; text-align: left; }
+  .vote-button span { display: none; }
   .site-footer { padding: 9px 0; }.footer-content { align-items: flex-start; flex-direction: column; gap: 7px; padding: 14px 0; }
   .lesson-block, .practice-card { padding: 21px; }
 }
