@@ -676,16 +676,6 @@ const supabaseClient = window.supabase.createClient(
   "sb_publishable_9Sh5f65trWG0fPz2dji2Sg_PTYAds3X",
 );
 
-function getAnonymousUserId() {
-  const key = "geoshag-anonymous-user-id";
-  let userId = localStorage.getItem(key);
-  if (!userId) {
-    userId = crypto.randomUUID();
-    localStorage.setItem(key, userId);
-  }
-  return userId;
-}
-
 function escapeHtml(value) {
   const element = document.createElement("div");
   element.textContent = value;
@@ -694,54 +684,40 @@ function escapeHtml(value) {
 
 function renderCommunity(taskId, container) {
   container.innerHTML = `<article class="lesson-block community-block" data-community data-task-id="${taskId}">
-    <div class="community-heading"><div><h2>Оцените материал</h2><p>Был ли разбор задания полезен?</p></div><p class="community-status" aria-live="polite"></p></div>
-    <div class="vote-row"><button class="vote-button" type="button" data-vote="like">👍 <span>Нравится</span> <b data-like-count>0</b></button><button class="vote-button" type="button" data-vote="dislike">👎 <span>Не нравится</span> <b data-dislike-count>0</b></button></div>
-    <div class="comments-area"><h3>Комментарии</h3><form class="comment-form" novalidate><label>Имя<input name="author" type="text" maxlength="60" autocomplete="name" required></label><label>Текст комментария<textarea name="text" rows="4" maxlength="600" required></textarea></label><button class="button" type="submit">Отправить</button></form><div class="comment-list" aria-live="polite"><p class="community-empty">Загрузка комментариев…</p></div></div>
+    <div class="community-heading"><div><h2>Комментарии и оценка</h2><p>Поделитесь впечатлением о разборе задания.</p></div><p class="community-status" aria-live="polite"></p></div>
+    <div class="comments-area"><h3>Оцените сайт</h3><div class="star-rating" role="radiogroup" aria-label="Оценка сайта"><button type="button" data-rating="1" aria-label="1 звезда">★</button><button type="button" data-rating="2" aria-label="2 звезды">★</button><button type="button" data-rating="3" aria-label="3 звезды">★</button><button type="button" data-rating="4" aria-label="4 звезды">★</button><button type="button" data-rating="5" aria-label="5 звёзд">★</button></div><form class="comment-form" novalidate><label>Имя<input name="author" type="text" maxlength="60" autocomplete="name" required></label><label>Текст комментария<textarea name="text" rows="4" maxlength="600" required></textarea></label><button class="button" type="submit">Отправить</button></form><div class="comment-list" aria-live="polite"><p class="community-empty">Загрузка комментариев…</p></div></div>
   </article>`;
 
   const block = container.querySelector("[data-community]");
   const status = block.querySelector(".community-status");
-  const likeCount = block.querySelector("[data-like-count]");
-  const dislikeCount = block.querySelector("[data-dislike-count]");
-  const voteButtons = [...block.querySelectorAll("[data-vote]")];
+  const stars = [...block.querySelectorAll("[data-rating]")];
   const commentForm = block.querySelector(".comment-form");
   const commentList = block.querySelector(".comment-list");
-  const userId = getAnonymousUserId();
+  let selectedRating = 0;
 
   const showError = () => { status.textContent = "Комментарии временно недоступны."; };
   const renderComments = (comments) => {
     commentList.innerHTML = comments.length
-      ? comments.map((comment) => `<article class="comment-item"><strong>${escapeHtml(comment.author)}</strong><p>${escapeHtml(comment.text)}</p></article>`).join("")
+      ? comments.map((comment) => {
+        const rating = Math.min(5, Math.max(1, Number(comment.rating) || 0));
+        const starsMarkup = rating ? `<span class="comment-rating" aria-label="Оценка ${rating} из 5">${"★".repeat(rating)}${"☆".repeat(5 - rating)}</span>` : "";
+        return `<article class="comment-item"><strong>${escapeHtml(comment.name)}</strong>${starsMarkup}<p>${escapeHtml(comment.comment)}</p></article>`;
+      }).join("")
       : '<p class="community-empty">Пока нет комментариев.</p>';
   };
   const loadCommunity = async () => {
     try {
-      const [votesResult, commentsResult, ownVoteResult] = await Promise.all([
-        supabaseClient.from("votes").select("vote").eq("task_id", taskId),
-        supabaseClient.from("comments").select("id, author, text, created_at").eq("task_id", taskId).order("created_at", { ascending: false }),
-        supabaseClient.from("votes").select("id").eq("task_id", taskId).eq("user_id", userId).maybeSingle(),
-      ]);
-      if (votesResult.error || commentsResult.error || ownVoteResult.error) throw new Error();
-      const votes = votesResult.data || [];
-      likeCount.textContent = String(votes.filter(({ vote }) => vote === "like").length);
-      dislikeCount.textContent = String(votes.filter(({ vote }) => vote === "dislike").length);
-      renderComments(commentsResult.data || []);
-      if (ownVoteResult.data) voteButtons.forEach((button) => { button.disabled = true; });
+      const { data: comments, error } = await supabaseClient.from("comments").select("id, name, rating, comment, created_at").order("created_at", { ascending: false });
+      if (error) throw new Error();
+      renderComments(comments || []);
     } catch {
       commentList.innerHTML = '<p class="community-empty">Комментарии временно недоступны.</p>';
     }
   };
 
-  voteButtons.forEach((button) => button.addEventListener("click", async () => {
-    voteButtons.forEach((item) => { item.disabled = true; });
-    const { error } = await supabaseClient.from("votes").insert({ task_id: taskId, user_id: userId, vote: button.dataset.vote });
-    if (error) {
-      voteButtons.forEach((item) => { item.disabled = false; });
-      status.textContent = "Не удалось сохранить голос. Попробуйте позже.";
-      return;
-    }
-    status.textContent = "Спасибо, голос учтён.";
-    loadCommunity();
+  stars.forEach((star) => star.addEventListener("click", () => {
+    selectedRating = Number(star.dataset.rating);
+    stars.forEach((item) => item.classList.toggle("selected", Number(item.dataset.rating) <= selectedRating));
   }));
 
   commentForm.addEventListener("submit", async (event) => {
@@ -752,15 +728,21 @@ function renderCommunity(taskId, container) {
       status.textContent = "Заполните имя и текст комментария.";
       return;
     }
+    if (!selectedRating) {
+      status.textContent = "Выберите оценку от 1 до 5 звёзд.";
+      return;
+    }
     const button = commentForm.querySelector("button");
     button.disabled = true;
-    const { error } = await supabaseClient.from("comments").insert({ task_id: taskId, author, text });
+    const { error } = await supabaseClient.from("comments").insert({ name: author, rating: selectedRating, comment: text });
     button.disabled = false;
     if (error) {
       showError();
       return;
     }
     commentForm.reset();
+    selectedRating = 0;
+    stars.forEach((star) => star.classList.remove("selected"));
     status.textContent = "Комментарий опубликован.";
     loadCommunity();
   });
@@ -822,7 +804,8 @@ function homePage() {
       <a class="benefit benefit-link" href="#/demo"><span class="benefit-icon">📄</span><h3>Демоверсия 2027</h3><p>Посмотри структуру КИМ, инструкцию и открой официальный файл.</p></a>
       <a class="benefit benefit-link" href="#/preparation"><span class="benefit-icon">🗺️</span><h3>План подготовки</h3><p>Собери реалистичный график, повторение и практику в одну систему.</p></a>
       <article class="benefit"><span class="benefit-icon">🧭</span><h3>По номерам КИМ</h3><p>Открывай именно то задание, которое хочешь повторить.</p></article>
-    </div></div></section>`;
+    </div></div></section>
+    <section class="section home-community"><div class="container"><div data-community-mount></div></div></section>`;
 }
 
 function tasksPage() {
@@ -861,7 +844,6 @@ function taskPage(task) {
       ${lessonBlock("Прототипы и разбор", prototypeBlocks(task.prototypes))}
       ${lessonBlock("Тренировка", practiceBlocks(task))}
       ${lessonBlock("Что запомнить", listItems(task.remember))}
-      <div data-community-mount></div>
       ${taskNavigation(task)}
     </div><aside class="practice-card"><p class="practice-label">САМОПОДГОТОВКА</p><h2>Работа над заданием</h2><p>Сначала реши задания из блока «Тренировка» самостоятельно, а затем открывай ответы и разбирай ход решения.</p></aside></div></section>`;
 }
@@ -896,7 +878,6 @@ function preparationPage() {
       ${lessonBlock("Практика и работа над ошибками", `<p>После каждой темы реши небольшой набор заданий именно этого типа, затем смешай его с уже пройденными. В журнале ошибок используй пять меток: «термин», «карта», «данные», «вычисление», «формат ответа». Для каждой записи добавляй правильный ход в одну-две строки и дату повторения. Ошибка считается закрытой только после двух самостоятельных верных решений в разные дни.</p>`)}
       ${lessonBlock("Подготовка ко второй части", `<p>Начинай её раньше полных пробников. Разбирай критерии: в вопросе на объяснение назови механизм, в задании с данными выпиши числа и вычисление, в прогнозе построй цепочку «условие → изменение → следствие». Пиши ответ пунктами, если вопрос требует несколько доводов. После проверки сравнивай работу не только с ответом, но и с тем, за что дают баллы: верный вывод без обоснования часто недостаточен.</p>`)}
       ${lessonBlock("За неделю и в день экзамена", listItems(["Не открывай новые большие темы: повтори формулы, карты, номенклатуру и журнал ошибок.", "Сделай один или два полноценных варианта, но не превращай последнюю неделю в марафон из пробников.", "На экзамен возьми разрешённый непрограммируемый калькулятор и распредели 180 минут: оставь запас на задания 22–29 и проверку бланков.", "Сначала собери надёжные баллы, затем возвращайся к сложным номерам. В конце проверь форму кратких ответов и номера развёрнутых."]))}
-      <p class="source-note">Материал написан специально для ГеоШага с опорой на общие идеи из <a href="https://tetrika-school.ru/blog/podgotovka-k-ege-po-geografii/" target="_blank" rel="noopener">статьи Тетрики</a> и <a href="https://umschool.one/blog/plan-podgotovki-k-ege-po-geografii-s-nulya-za-god" target="_blank" rel="noopener">материала Умскул</a>; формулировки и структура — оригинальные.</p>
     </div><aside class="practice-card"><p class="practice-label">ПРАВИЛО НЕДЕЛИ</p><h2>Один цикл — четыре шага</h2><p>Тема → карта → задания → журнал ошибок. Если выпадает один шаг, знания быстро становятся «узнаваемыми», но не рабочими.</p><a class="button" href="#/tasks">Выбрать задание</a></aside></div></section>`;
 }
 
@@ -910,7 +891,10 @@ function render() {
   const task = taskMatch && tasks.find(({ number }) => number === Number(taskMatch[1]));
   app.innerHTML = route === "/" ? homePage() : route === "/tasks" ? tasksPage() : route === "/demo" ? demoPage() : route === "/preparation" ? preparationPage() : task ? taskPage(task) : notFoundPage();
 
-  if (task) renderCommunity(`task-${task.number}`, app.querySelector("[data-community-mount]"));
+  if (route === "/") {
+    const mount = app.querySelector("[data-community-mount]");
+    if (mount) renderCommunity("site", mount);
+  }
 
   document.querySelectorAll("[data-nav]").forEach((link) => {
     const activeNav = route === "/" ? "home" : route === "/tasks" || task ? "tasks" : route === "/demo" ? "demo" : route === "/preparation" ? "preparation" : "";
