@@ -671,7 +671,7 @@ const tasks = [
 
 const app = document.querySelector("#app");
 
-const supabaseClient = window.supabase.createClient(
+const supabaseClient = window.supabase?.createClient(
   "https://asrgtvzpothaghypbuoy.supabase.co",
   "sb_publishable_9Sh5f65trWG0fPz2dji2Sg_PTYAds3X",
 );
@@ -889,7 +889,9 @@ function render() {
   const route = location.hash.slice(1) || "/";
   const taskMatch = route.match(/^\/tasks\/(\d+)$/);
   const task = taskMatch && tasks.find(({ number }) => number === Number(taskMatch[1]));
-  app.innerHTML = route === "/" ? homePage() : route === "/tasks" ? tasksPage() : route === "/demo" ? demoPage() : route === "/preparation" ? preparationPage() : task ? taskPage(task) : notFoundPage();
+  app.innerHTML = route.startsWith("/oge")
+    ? ogePage(route)
+    : route === "/" ? homePage() : route === "/tasks" ? tasksPage() : route === "/demo" ? demoPage() : route === "/preparation" ? preparationPage() : task ? taskPage(task) : notFoundPage();
 
   if (route === "/") {
     const mount = app.querySelector("[data-community-mount]");
@@ -897,7 +899,7 @@ function render() {
   }
 
   document.querySelectorAll("[data-nav]").forEach((link) => {
-    const activeNav = route === "/" ? "home" : route === "/tasks" || task ? "tasks" : route === "/demo" ? "demo" : route === "/preparation" ? "preparation" : "";
+    const activeNav = route.startsWith("/oge") ? "oge" : route === "/" ? "home" : route === "/tasks" || task ? "tasks" : route === "/demo" ? "demo" : route === "/preparation" ? "preparation" : "";
     link.classList.toggle("active", link.dataset.nav === activeNav);
   });
   document.querySelectorAll("[data-reveal]").forEach((button) => {
@@ -909,6 +911,7 @@ function render() {
       button.textContent = isHidden ? "Скрыть ответ" : "Показать ответ";
     });
   });
+  if (route.startsWith("/oge")) bindOgeEvents();
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 

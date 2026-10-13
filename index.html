@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="ГеоШаг — понятная подготовка к ЕГЭ по географии."
+      content="ГеоШаг — понятная подготовка к ЕГЭ и ОГЭ по географии."
     />
-    <title>ГеоШаг — подготовка к ЕГЭ</title>
+    <title>ГеоШаг — подготовка к ЕГЭ и ОГЭ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,6 +16,8 @@
     />
     <link rel="stylesheet" href="styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="oge-data.js" defer></script>
+    <script src="oge.js" defer></script>
     <script src="app.js" defer></script>
   </head>
   <body>
@@ -26,10 +28,11 @@
           <span>ГеоШаг</span>
         </a>
         <nav class="main-nav" aria-label="Основная навигация">
-          <a href="#/" data-nav="home">Главная</a>
+          <a href="#/" data-nav="home">ЕГЭ · Главная</a>
           <a href="#/tasks" data-nav="tasks">Задания</a>
           <a href="#/demo" data-nav="demo">Демоверсия 2027</a>
           <a href="#/preparation" data-nav="preparation">Подготовка</a>
+          <a href="#/oge" data-nav="oge">ОГЭ</a>
         </nav>
       </div>
     </header>
@@ -42,7 +45,7 @@
           <span class="brand-mark" aria-hidden="true">G</span>
           <span>ГеоШаг</span>
         </a>
-        <p>Подготовка к ЕГЭ по географии — шаг за шагом.</p>
+        <p>Подготовка к ЕГЭ и ОГЭ по географии — шаг за шагом.</p>
       </div>
     </footer>
   </body>
